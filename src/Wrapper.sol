@@ -2,14 +2,15 @@
 pragma solidity ^0.8.24;
 
 import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import {ERC20Votes} from "openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 contract Wrapper is ERC20 {
-    ERC20 govToken;
+    ERC20Votes govToken;
 
     constructor(address _govToken)
         ERC20(string.concat("Wrapped", ERC20(_govToken).name()), string.concat("W", ERC20(_govToken).symbol()))
     {
-        govToken = ERC20(_govToken);
+        govToken = ERC20Votes(_govToken);
     }
 
     function wrap(uint256 amount) public {

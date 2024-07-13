@@ -15,6 +15,9 @@ contract DelegationMarketHook is BaseHook, Wrapper {
     uint256 oldBalance;
     uint256 newBalance;
 
+    address currentBriber;
+    uint256 feesAccrued;
+
     constructor(IPoolManager _poolManager, address _govToken) BaseHook(_poolManager) Wrapper(_govToken) {}
 
     function getHookPermissions() public pure override returns (Hooks.Permissions memory) {
@@ -34,6 +37,14 @@ contract DelegationMarketHook is BaseHook, Wrapper {
             afterAddLiquidityReturnDelta: false,
             afterRemoveLiquidityReturnDelta: false
         });
+    }
+
+    function sellDelegation() public {
+        govToken.transferFrom(msg.sender, address(this), 100_000);
+
+        govToken.delegate(msg.sender);
+
+        feesAccrued += 100_000;
     }
 
     function beforeRemoveLiquidity(
