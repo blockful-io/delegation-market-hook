@@ -12,6 +12,12 @@ import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "v4-core/src/types/BeforeSwapDelta.sol";
 
 contract DelegationMarketHook is BaseHook, Wrapper {
+    using PoolIdLibrary for PoolKey;
+
+    // NOTE: ---------------------------------------------------------
+    // state variables should typically be unique to a pool
+    // a single hook contract should be able to service multiple pools
+    // ---------------------------------------------------------------
     uint256 oldBalance;
     uint256 newBalance;
 
@@ -39,19 +45,15 @@ contract DelegationMarketHook is BaseHook, Wrapper {
         });
     }
 
-    function sellDelegation() public {
-        govToken.transferFrom(msg.sender, address(this), 100_000);
-
-        govToken.delegate(msg.sender);
-
-        feesAccrued += 100_000;
-    }
+    // -----------------------------------------------
+    // NOTE: see IHooks.sol for function documentation
+    // -----------------------------------------------
 
     function beforeRemoveLiquidity(
         address sender,
         PoolKey calldata key,
-        IPoolManager.ModifyLiquidityParams calldata params,
-        bytes calldata hookData
+        IPoolManager.ModifyLiquidityParams calldata,
+        bytes calldata
     ) external override returns (bytes4) {
         oldBalance = govToken.balanceOf(sender);
 
@@ -65,10 +67,20 @@ contract DelegationMarketHook is BaseHook, Wrapper {
         BalanceDelta delta,
         bytes calldata hookData
     ) external override returns (bytes4, BalanceDelta) {
+
         newBalance = govToken.balanceOf(sender);
 
-        uint256 percentage = (oldBalance - newBalance) * 10_000 / oldBalance;
+        // uint256 percentage = (oldBalance - newBalance) * 10_000 / oldBalance;
 
         return (BaseHook.afterRemoveLiquidity.selector, delta);
+    }
+
+
+    function sellDelegation() public {
+        govToken.transferFrom(msg.sender, address(this), 100_000);
+
+        govToken.delegate(msg.sender);
+
+        feesAccrued += 100_000;
     }
 }
