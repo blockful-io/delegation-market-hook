@@ -91,4 +91,3 @@ contract DelegationMarketHook is BaseHook, Wrapper {
     }
 }
 
-forge verify-contract --contract-path src/DelegationMarket.sol:DelegationMarket --rpc-url $RPC_URL --etherscan-api-key $ETHERSCAN_API_KEY --constructor-args 0x912CE59144191C1204E64559FE8253a0e49E6548
