@@ -67,7 +67,6 @@ contract DelegationMarketHook is BaseHook, Wrapper {
         BalanceDelta delta,
         bytes calldata hookData
     ) external override returns (bytes4, BalanceDelta) {
-
         newBalance = govToken.balanceOf(sender);
 
         // uint256 percentage = (oldBalance - newBalance) * 10_000 / oldBalance;
@@ -75,12 +74,11 @@ contract DelegationMarketHook is BaseHook, Wrapper {
         return (BaseHook.afterRemoveLiquidity.selector, delta);
     }
 
-
     function sellDelegation() public {
-        govToken.transferFrom(msg.sender, address(this), 100_000);
+        govToken.transferFrom(msg.sender, address(this), 1 ether);
 
         govToken.delegate(msg.sender);
 
-        feesAccrued += 100_000;
+        feesAccrued += 1 ether;
     }
 }
