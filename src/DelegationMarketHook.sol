@@ -55,7 +55,7 @@ contract DelegationMarketHook is BaseHook, Wrapper {
         IPoolManager.ModifyLiquidityParams calldata,
         bytes calldata
     ) external override returns (bytes4) {
-        oldBalance = govToken.balanceOf(sender);
+        oldBalance = balanceOf(address(poolManager));
 
         return BaseHook.beforeRemoveLiquidity.selector;
     }
@@ -67,9 +67,17 @@ contract DelegationMarketHook is BaseHook, Wrapper {
         BalanceDelta delta,
         bytes calldata hookData
     ) external override returns (bytes4, BalanceDelta) {
-        newBalance = govToken.balanceOf(sender);
+        newBalance = balanceOf(address(poolManager));
+        uint256 feesToPay;
 
-        // uint256 percentage = (oldBalance - newBalance) * 10_000 / oldBalance;
+        if (newBalance == 0) {
+            feesToPay = feesAccrued;
+        } else {
+            feesToPay = feesAccrued * (oldBalance - newBalance) / oldBalance;
+        }
+
+        govToken.transferFrom(address(this), sender, balanceOf(sender) + feesToPay);
+        _burn(sender, balanceOf(sender));
 
         return (BaseHook.afterRemoveLiquidity.selector, delta);
     }
